@@ -1,0 +1,42 @@
+
+room_A = "dirty"
+room_B = "dirty"
+
+position = input("Enter vacuum position (A/B): ").upper()
+
+while True:
+
+    print("\n----------------------")
+    print("Room A:", room_A)
+    print("Room B:", room_B)
+    print("Vacuum Position:", position)
+
+    if position == "A":
+
+        if room_A == "dirty":
+            print("Agent: Room A is dirty.")
+            print("Agent action: SUCK")
+            room_A = "clean"
+
+        else:
+            print("Agent: Room A is clean.")
+            print("Agent action: RIGHT")
+            position = "B"
+
+    elif position == "B":
+
+        if room_B == "dirty":
+            print("Agent: Room B is dirty.")
+            print("Agent action: SUCK")
+            room_B = "clean"
+
+        else:
+            print("Agent: Room B is clean.")
+            print("Agent action: LEFT")
+            position = "A"
+
+    if room_A == "clean" and room_B == "clean":
+        print("\n----------------------")
+        print("Both rooms are clean!")
+        print("Goal state reached.")
+        break
