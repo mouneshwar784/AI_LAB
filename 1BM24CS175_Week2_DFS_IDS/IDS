@@ -1,0 +1,133 @@
+
+start = [
+    [1, 2, 3],
+    [0, 4, 6],
+    [7, 5, 8]
+]
+
+goal = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 0]
+]
+
+
+def print_puzzle(state):
+    for row in state:
+        print(row)
+    print()
+
+
+def make_tuple(state):
+    return tuple(tuple(row) for row in state)
+
+
+def find_zero(state):
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] == 0:
+                return i, j
+
+
+def move(state, new_i, new_j):
+
+    i, j = find_zero(state)
+
+    new_state = [row[:] for row in state]
+
+    new_state[i][j], new_state[new_i][new_j] = \
+        new_state[new_i][new_j], new_state[i][j]
+
+    return new_state
+
+
+def get_neighbors(state):
+
+    i, j = find_zero(state)
+
+    neighbors = []
+
+    if i > 0:
+        neighbors.append(move(state, i - 1, j))
+
+    if i < 2:
+        neighbors.append(move(state, i + 1, j))
+
+    if j > 0:
+        neighbors.append(move(state, i, j - 1))
+
+    if j < 2:
+        neighbors.append(move(state, i, j + 1))
+
+    return neighbors
+
+
+def depth_limited_search(state, goal, limit, depth, visited):
+
+    print("Depth:", depth)
+    print_puzzle(state)
+
+    if state == goal:
+        print("GOAL FOUND!")
+        print("Depth:", depth)
+        return True
+
+    if depth == limit:
+        return False
+
+    state_tuple = make_tuple(state)
+
+    visited.add(state_tuple)
+
+    neighbors = get_neighbors(state)
+
+    for next_state in neighbors:
+
+        next_tuple = make_tuple(next_state)
+
+        if next_tuple not in visited:
+
+            found = depth_limited_search(
+                next_state,
+                goal,
+                limit,
+                depth + 1,
+                visited
+            )
+
+            if found:
+                return True
+
+    visited.remove(state_tuple)
+
+    return False
+
+
+def ids(start, goal):
+
+    limit = 0
+
+    while True:
+
+        print("==============================")
+        print("DEPTH LIMIT:", limit)
+        print("==============================")
+
+        visited = set()
+
+        found = depth_limited_search(
+            start,
+            goal,
+            limit,
+            0,
+            visited
+        )
+
+        if found:
+            print("IDS COMPLETED")
+            return
+
+        limit = limit + 1
+
+
+ids(start, goal)
