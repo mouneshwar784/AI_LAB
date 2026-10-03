@@ -1,0 +1,103 @@
+
+start = [
+    [1, 2, 3],
+    [0, 4, 6],
+    [7, 5, 8]
+]
+
+goal = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 0]
+]
+
+
+def print_puzzle(state):
+    for row in state:
+        print(row)
+    print()
+
+
+
+def make_tuple(state):
+    return tuple(tuple(row) for row in state)
+
+
+def find_zero(state):
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] == 0:
+                return i, j
+
+
+def move(state, new_i, new_j):
+
+    i, j = find_zero(state)
+
+    new_state = [row[:] for row in state]
+
+    new_state[i][j], new_state[new_i][new_j] = \
+        new_state[new_i][new_j], new_state[i][j]
+
+    return new_state
+
+
+def get_neighbors(state):
+
+    i, j = find_zero(state)
+
+    neighbors = []
+
+    if i > 0:
+        neighbors.append(move(state, i - 1, j))
+
+    if i < 2:
+        neighbors.append(move(state, i + 1, j))
+
+    if j > 0:
+        neighbors.append(move(state, i, j - 1))
+
+    if j < 2:
+        neighbors.append(move(state, i, j + 1))
+
+    return neighbors
+
+
+def dfs(start, goal):
+
+    stack = [(start, 0)]
+
+    visited = set()
+
+    while stack:
+
+        state, depth = stack.pop()
+
+        state_tuple = make_tuple(state)
+
+        if state_tuple in visited:
+            continue
+
+        visited.add(state_tuple)
+
+        print("Depth:", depth)
+        print_puzzle(state)
+
+        if state == goal:
+            print("GOAL FOUND!")
+            print("Depth:", depth)
+            return
+
+        neighbors = get_neighbors(state)
+
+        for next_state in neighbors:
+
+            next_tuple = make_tuple(next_state)
+
+            if next_tuple not in visited:
+                stack.append((next_state, depth + 1))
+
+    print("Goal not found")
+
+
+dfs(start, goal)
