@@ -1,0 +1,123 @@
+
+import heapq
+
+start = (1, 2, 3,
+         0, 4, 6,
+         7, 5, 8)
+
+goal = (1, 2, 3,
+        4, 5, 6,
+        7, 8, 0)
+
+
+def heuristic(state):
+    return sum(
+        1 for i in range(9)
+        if state[i] != 0 and state[i] != goal[i]
+    )
+
+
+def get_neighbors(state):
+    neighbors = []
+    blank = state.index(0)
+    row, col = divmod(blank, 3)
+
+    moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    for dr, dc in moves:
+        nr, nc = row + dr, col + dc
+
+        if 0 <= nr < 3 and 0 <= nc < 3:
+            new_pos = nr * 3 + nc
+            new_state = list(state)
+
+            new_state[blank], new_state[new_pos] = (
+                new_state[new_pos], new_state[blank]
+            )
+
+            neighbors.append(tuple(new_state))
+
+    return neighbors
+
+
+def show_puzzle(state):
+    for i in range(0, 9, 3):
+        print(" ".join(
+            "_" if x == 0 else str(x)
+            for x in state[i:i+3]
+        ))
+
+
+def a_star(start, goal):
+    pq = [(heuristic(start), 0, start)]
+    cost = {start: 0}
+    parent = {start: None}
+    expanded = set()
+    levels = {}
+
+    while pq:
+        f, g, current = heapq.heappop(pq)
+
+        if g != cost[current]:
+            continue
+
+        if current in expanded:
+            continue
+
+        expanded.add(current)
+
+        # Group expanded puzzles by depth
+        levels.setdefault(g, []).append(current)
+
+        if current == goal:
+            break
+
+        for neighbor in get_neighbors(current):
+            new_g = g + 1
+
+            if neighbor not in cost or new_g < cost[neighbor]:
+                cost[neighbor] = new_g
+                parent[neighbor] = current
+
+                h = heuristic(neighbor)
+                heapq.heappush(
+                    pq, (new_g + h, new_g, neighbor)
+                )
+
+    # Display all expanded puzzles at each depth
+    for level in sorted(levels):
+        print("\n========== LEVEL", level, "==========")
+
+        for number, state in enumerate(levels[level], 1):
+            print("\nPuzzle", number)
+            show_puzzle(state)
+
+            g = level
+            h = heuristic(state)
+
+            print("g(n) =", g)
+            print("h(n) =", h)
+            print("f(n) =", g + h)
+
+    # Display solution path
+    if goal in parent:
+        path = []
+        current = goal
+
+        while current is not None:
+            path.append(current)
+            current = parent[current]
+
+        path.reverse()
+
+        print("\n========== SOLUTION PATH ==========")
+        for step, state in enumerate(path):
+            print("\nStep", step)
+            show_puzzle(state)
+
+        print("\nTotal moves:", len(path) - 1)
+    else:
+        print("No solution found.")
+
+
+a_star(start, goal)
