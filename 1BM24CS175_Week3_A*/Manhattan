@@ -1,0 +1,143 @@
+
+import heapq
+
+# Initial state (0 represents the blank tile)
+start = (1, 2, 3,
+         0, 4, 6,
+         7, 5, 8)
+
+# Goal state
+goal = (1, 2, 3,
+        4, 5, 6,
+        7, 8, 0)
+
+
+# Manhattan Distance heuristic
+def heuristic(state):
+    distance = 0
+
+    for i in range(9):
+        tile = state[i]
+
+        if tile != 0:
+            goal_pos = goal.index(tile)
+
+            row1, col1 = divmod(i, 3)
+            row2, col2 = divmod(goal_pos, 3)
+
+            distance += abs(row1 - row2) + abs(col1 - col2)
+
+    return distance
+
+
+# Generate possible next states
+def get_neighbors(state):
+    neighbors = []
+
+    blank = state.index(0)
+    row, col = divmod(blank, 3)
+
+    moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    for dr, dc in moves:
+        nr, nc = row + dr, col + dc
+
+        if 0 <= nr < 3 and 0 <= nc < 3:
+            new_pos = nr * 3 + nc
+            new_state = list(state)
+
+            new_state[blank], new_state[new_pos] = (
+                new_state[new_pos], new_state[blank]
+            )
+
+            neighbors.append(tuple(new_state))
+
+    return neighbors
+
+
+# Display the puzzle
+def display(state):
+    for i in range(0, 9, 3):
+        print(" ".join(
+            "_" if x == 0 else str(x)
+            for x in state[i:i + 3]
+        ))
+
+
+# A* Search Algorithm
+def a_star(start, goal):
+    pq = [(heuristic(start), 0, start)]
+
+    cost = {start: 0}
+    parent = {start: None}
+    expanded = set()
+    levels = {}
+
+    while pq:
+        f, g, current = heapq.heappop(pq)
+
+        if g != cost[current]:
+            continue
+
+        if current in expanded:
+            continue
+
+        expanded.add(current)
+
+        # Store expanded puzzles by depth
+        levels.setdefault(g, []).append(current)
+
+        if current == goal:
+            break
+
+        for neighbor in get_neighbors(current):
+            new_g = g + 1
+
+            if neighbor not in cost or new_g < cost[neighbor]:
+                cost[neighbor] = new_g
+                parent[neighbor] = current
+
+                h = heuristic(neighbor)
+                heapq.heappush(
+                    pq, (new_g + h, new_g, neighbor)
+                )
+
+    # Print all expanded states by level
+    for level in sorted(levels):
+        print("\n===== LEVEL", level, "=====")
+
+        for number, state in enumerate(levels[level], 1):
+            g = level
+            h = heuristic(state)
+
+            print("\nPuzzle", number)
+            display(state)
+            print("g(n) =", g)
+            print("h(n) =", h)
+            print("f(n) =", g + h)
+
+    # Print the solution path
+    if goal in parent:
+        path = []
+        current = goal
+
+        while current is not None:
+            path.append(current)
+            current = parent[current]
+
+        path.reverse()
+
+        print("\n===== SOLUTION PATH =====")
+
+        for step, state in enumerate(path):
+            print("\nStep", step)
+            display(state)
+
+        print("\nTotal moves =", len(path) - 1)
+
+    else:
+        print("No solution found.")
+
+
+# Run the algorithm
+a_star(start, goal)
