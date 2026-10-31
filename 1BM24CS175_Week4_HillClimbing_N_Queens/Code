@@ -1,0 +1,92 @@
+
+import random
+
+# Calculate the cost (number of attacking queen pairs)
+def calculate_cost(state):
+    cost = 0
+    n = len(state)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            # Check diagonal attack
+            if abs(state[i] - state[j]) == abs(i - j):
+                cost += 1
+
+    return cost
+
+
+# Generate neighboring states by swapping two queens
+def generate_neighbors(state):
+    neighbors = []
+    n = len(state)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            new_state = state.copy()
+
+            # Swap row positions
+            new_state[i], new_state[j] = new_state[j], new_state[i]
+
+            neighbors.append(new_state)
+
+    return neighbors
+
+
+# Display chessboard
+def display_board(state):
+    n = len(state)
+
+    for row in range(n):
+        for col in range(n):
+            if state[col] == row:
+                print(" Q ", end="")
+            else:
+                print(" . ", end="")
+        print()
+
+
+# Hill Climbing Algorithm
+def hill_climbing():
+    n = 4
+
+    # Initialize random state
+    current_state = list(range(n))
+    random.shuffle(current_state)
+
+    print("Initial State:", current_state)
+
+    while True:
+        current_cost = calculate_cost(current_state)
+
+        print("\nCurrent State:", current_state)
+        print("Current Cost:", current_cost)
+
+        # Goal state reached
+        if current_cost == 0:
+            print("\nSolution Found!")
+            display_board(current_state)
+            return
+
+        # Generate neighbors
+        neighbors = generate_neighbors(current_state)
+
+        # Find neighbor with minimum cost
+        best_neighbor = min(neighbors, key=calculate_cost)
+        best_cost = calculate_cost(best_neighbor)
+
+        print("Best Neighbor:", best_neighbor)
+        print("Best Neighbor Cost:", best_cost)
+
+        # Stop if no improvement
+        if best_cost >= current_cost:
+            print("\nNo better neighbor found!")
+            print("Hill Climbing Stopped.")
+            print("Local Minimum Reached.")
+            return
+
+        # Move to better neighbor
+        current_state = best_neighbor
+
+
+# Main program
+hill_climbing()
