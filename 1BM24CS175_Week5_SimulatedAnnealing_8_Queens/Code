@@ -1,0 +1,98 @@
+
+import random
+import math
+
+# Calculate the number of attacking queen pairs
+def calculate_cost(board):
+    cost = 0
+    n = len(board)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if board[i] == board[j] or abs(board[i] - board[j]) == abs(i - j):
+                cost += 1
+
+    return cost
+
+
+# Simulated Annealing Algorithm
+def simulated_annealing():
+    n = 8
+
+    # Initial random configuration
+    board = [random.randint(1, 8) for _ in range(n)]
+
+    temperature = 10
+    cooling_rate = 0.95
+    iteration = 1
+
+    print("Initial State:", board)
+    print("Initial Cost:", calculate_cost(board))
+
+    while temperature > 0.001:
+
+        current_cost = calculate_cost(board)
+
+        # Check goal state
+        if current_cost == 0:
+            print("\nGoal State Reached!")
+            print("Final Board:", board)
+            print("Final Cost:", current_cost)
+            return
+
+        # Generate a neighboring state
+        neighbor = board[:]
+
+        col = random.randint(0, 7)
+        new_row = random.randint(1, 8)
+
+        while new_row == neighbor[col]:
+            new_row = random.randint(1, 8)
+
+        neighbor[col] = new_row
+
+        next_cost = calculate_cost(neighbor)
+
+        # Calculate change in cost
+        delta_E = next_cost - current_cost
+
+        # Accept or reject the neighbor
+        if delta_E < 0:
+            board = neighbor
+            decision = "Accepted (Better State)"
+
+        else:
+            probability = math.exp(-delta_E / temperature)
+            random_number = random.random()
+
+            if random_number < probability:
+                board = neighbor
+                decision = "Accepted (Worse State)"
+            else:
+                decision = "Rejected"
+
+        # Display iteration details
+        print("\nIteration:", iteration)
+        print("Current Cost:", current_cost)
+        print("Next Cost:", next_cost)
+        print("Delta E:", delta_E)
+
+        if delta_E > 0:
+            print("Acceptance Probability:", round(probability, 4))
+
+        print("Decision:", decision)
+
+        # Reduce temperature
+        temperature = temperature * cooling_rate
+
+        print("Temperature:", round(temperature, 4))
+
+        iteration += 1
+
+    print("\nSolution Not Found!")
+    print("Final Board:", board)
+    print("Final Cost:", calculate_cost(board))
+
+
+# Main program
+simulated_annealing()
